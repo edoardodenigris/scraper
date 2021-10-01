@@ -147,3 +147,8 @@ df_final = df_final[(df_final['is_closed']==False) & (df_final['is_sold']==False
 
 
 print('ciao')
+
+
+df_final['Actual_Profit'] = df_final['min_estimate'] - df_final['next_minimum_bid'] - df_final['shipping_cost'] - (df_final['next_minimum_bid']* 0.09)
+df_final['max_bid'] = (df_final['min_estimate']-df_final['Actual_Profit']).div(1.09)
+df_final['Ratio'] = df_final['max_bid'] / df_final['Actual_Profit'] # più è vicino a zero maggiore è la possibilità di profitto
