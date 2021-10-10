@@ -143,27 +143,7 @@ df_final = reduce(lambda left,right: pd.merge(left,right,on='id'), dfs)
 
 # Now we have to filter out auctions that are either closed or item is sold
 df_final = df_final[(df_final['is_closed']==False) & (df_final['is_sold']==False)]
-df_final['limit_price'] = df_final['min_estimate'].div(1.09)-df_final['shipping_cost']
-df_final["potential_profit"] = df_final['limit_price']-df_final['highest_bid_amount']
-df_final = df_final.sort_values(by='potential_profit',ascending=False)
 
-
-
-
-##### PROVA MAIL AUTOMATICHE
-
-
-import yagmail
-user = 'edoardodenigris2@gmail.com'
-app_password = 'nmbpmydtascetavi' # a token for gmail
-to = 'edoardodenigris2@gmail.com'
-
-subject = 'test subject 1'
-content = ['mail body content']
-
-with yagmail.SMTP(user, app_password) as yag:
-    yag.send(to, subject, content)
-    print('Sent email successfully')
 
 
 print('ciao')
