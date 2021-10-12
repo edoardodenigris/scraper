@@ -4,6 +4,14 @@ from bs4 import BeautifulSoup
 import json
 from functools import reduce
 
+# SET GMAIL PWD
+try:
+    with open('C:\\Users\\Admin\\Desktop\\catawiki\\pwd_gmail.txt', 'r') as file:
+        gmail_app_pwd = file.read().replace('\n', '')
+except:
+    pass
+
+
 # FUNCIONS
 # 1) GET ALL THE ITEMS IN A SPECIFIC CATEGORY (ex watches)
 def get_lots(n_pages,category):
@@ -25,7 +33,7 @@ def get_lots(n_pages,category):
                 single_lot_id = pd.DataFrame.from_dict(lots[i], orient='index').T
                 lots_df = pd.concat([lots_df, single_lot_id], ignore_index=True)
         except:
-            pass
+            continue
 
     return lots_df
 
@@ -48,7 +56,7 @@ def get_item_auction_details(id_list):
             items_df = pd.concat([items_df, lots], ignore_index=True)
             print(id)
         except:
-            pass
+            continue
     return items_df
 
 # 4) EXTRACT FOR A GIVEN BIDDING AUCTION DETAILS
@@ -66,7 +74,7 @@ def get_bidding_details(id_list):
             items_df = pd.concat([items_df, lots], ignore_index=True)
             print(id)
         except:
-            pass
+            continue
     return items_df
 
 def get_expert_estimates(list_of_ids):
@@ -77,7 +85,7 @@ def get_expert_estimates(list_of_ids):
             r = requests.get('https://www.catawiki.com/it/l/' + str(id))
             # Extract content
             c = r.content
-            soup = BeautifulSoup(c)
+            soup = BeautifulSoup(c,"html.parser")
             min_expert_estimate_dict = \
                 json.loads(soup.findAll("div", {"class": "lot-details-page-wrapper"})[0].attrs['data-props'])[
                     'expertsEstimate'][
@@ -90,7 +98,7 @@ def get_expert_estimates(list_of_ids):
             min_expert_estimate = pd.DataFrame.from_dict(min_expert_estimate_dict, orient='index').T['EUR'][0]
             min_max[id] = [min_expert_estimate, max_expert_estimate]
         except:
-            pass
+            continue
         expert_df = pd.DataFrame.from_dict(min_max, orient='index').reset_index()
         expert_df.columns = ['id', 'min_estimate', 'max_estimate']
         print(id)
@@ -109,7 +117,7 @@ def get_shipping_costs(list_of_ids):
             shipping_costs = pd.DataFrame(result["shipping"]["rates"])
             shipping_cost_dict[ids] = shipping_costs[shipping_costs['region_code'] == 'it']['price'].div(100).iloc[0]
         except:
-            pass
+            continue
         print(ids)
     shipping_df = pd.DataFrame.from_dict(shipping_cost_dict, orient='index').reset_index()
     shipping_df.columns = ['id', 'shipping_cost']
@@ -149,12 +157,19 @@ df_final['Actual_Profit'] = df_final['min_estimate'] - df_final['next_minimum_bi
 df_final['max_bid'] = (df_final['min_estimate']-df_final['Actual_Profit']).div(1.09)
 df_final['Ratio'] = df_final['max_bid'] / df_final['Actual_Profit'] # più è vicino a zero maggiore è la possibilità di profitto
 
+
+
+
+
+
+
+
 ##### PROVA MAIL AUTOMATICHE
 
 import yagmail
 
 user = 'edoardodenigris2@gmail.com'
-app_password = 'nmbpmydtascetavi' # a token for gmail
+app_password = gmail_app_pwd # a token for gmail
 to = 'edoardodenigris2@gmail.com'
 
 subject = 'test subject 1'
