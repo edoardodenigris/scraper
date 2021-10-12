@@ -3,6 +3,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import json
 from functools import reduce
+import datetime
 
 # SET GMAIL PWD
 try:
@@ -157,9 +158,16 @@ df_final['Actual_Profit'] = df_final['min_estimate'] - df_final['next_minimum_bi
 df_final['max_bid'] = (df_final['min_estimate']-df_final['Actual_Profit']).div(1.09)
 df_final['Ratio'] = df_final['max_bid'] / df_final['Actual_Profit'] # più è vicino a zero maggiore è la possibilità di profitto
 
+# Now that we have the final DF we can select relevant items
+top_items = df_final[df_final['Ratio']>0].sort_values(by='Ratio').head(10)
 
 
-
+# How much time left to make an offer?
+hour_now = datetime.datetime.now().hour
+minute_now = datetime.datetime.now().minute
+# We take into account timeLag from Italy
+top_items['end_hour_delta'] = (top_items['planned_close_at'].str[11:13].astype(int)+2) - datetime.datetime.now().hour
+top_items['end_minute_delta'] = (top_items['planned_close_at'].str[14:16].astype(int)) - datetime.datetime.now().minute
 
 
 
