@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 import json
 from functools import reduce
 import datetime
+import numpy as np
+import matplotlib.pyplot as plt
 
 # SET GMAIL PWD
 try:
@@ -124,10 +126,11 @@ def get_shipping_costs(list_of_ids):
     shipping_df.columns = ['id', 'shipping_cost']
     return  shipping_df
 
+
 # MAIN CODE
 # Setting some parameters
 n_pages = 2
-category = 333
+category = 715
 
 
 # Getting Lots info
@@ -165,16 +168,18 @@ df_final['end_hour_delta'] = (df_final['planned_close_at'].str[11:13].astype(int
 df_final['end_minute_delta'] = abs((df_final['planned_close_at'].str[14:16].astype(int)) - datetime.datetime.now().minute)
 
 
-# We filter based on min_estimate
+# We filter based on min_estimate (we don't want items that are too expensive)
 threshold = df_final.min_estimate.quantile(0.6)
 df_final  = df_final[df_final['next_minimum_bid']<=threshold]
 
 # Now that we have the final DF we can select relevant items
-top_items = df_final[df_final['Ratio']>0].sort_values(by='Ratio').head(10)
+top_items = df_final[df_final['Ratio']>0].sort_values(by='Ratio').head(10).sort_values(by='favoriteCount', ascending=False)
 
 
 
-
+from pretty_html_table import build_table
+df = top_items[['title','next_minimum_bid','end_hour_delta','end_minute_delta','reservePriceSet','Actual_Profit','url']]
+output = build_table(df, 'blue_light')
 
 ##### PROVA MAIL AUTOMATICHE
 
@@ -182,10 +187,10 @@ import yagmail
 
 user = 'edoardodenigris2@gmail.com'
 app_password = gmail_app_pwd # a token for gmail
-to = 'edoardodenigris2@gmail.com'
+to = ['edoardodenigris2@gmail.com','irenepinto@hotmail.it']
 
 subject = 'test subject 1'
-content = ['mail body content']
+content = ['Hey! These are the top 10 items in the category: '+str(category),output]
 
 with yagmail.SMTP(user, app_password) as yag:
     yag.send(to, subject, content)
