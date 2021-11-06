@@ -187,7 +187,7 @@ import yagmail
 
 user = 'edoardodenigris2@gmail.com'
 app_password = gmail_app_pwd # a token for gmail
-to = ['edoardodenigris2@gmail.com','irenepinto@hotmail.it']
+to = ['edoardodenigris2@gmail.com']
 
 subject = 'test subject 1'
 content = ['Hey! These are the top 10 items in the category: '+str(category),output]
