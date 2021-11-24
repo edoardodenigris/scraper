@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 import json
 from functools import reduce
 import datetime
+from pretty_html_table import build_table
+import yagmail
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -130,7 +132,7 @@ def get_shipping_costs(list_of_ids):
 # MAIN CODE
 # Setting some parameters
 n_pages = 2
-category = 715
+category = 599
 
 
 # Getting Lots info
@@ -159,12 +161,12 @@ df_final = df_final[(df_final['is_closed']==False) & (df_final['is_sold']==False
 
 df_final['Actual_Profit'] = df_final['min_estimate'] - df_final['next_minimum_bid'] - df_final['shipping_cost'] - (df_final['next_minimum_bid']* 0.09)
 df_final['max_bid'] = df_final['min_estimate'].div(1.09) - df_final['shipping_cost']
-df_final['Ratio'] = df_final['max_bid'] / df_final['Actual_Profit'] # più è vicino a zero maggiore è la possibilità di profitto
+df_final['Ratio'] = df_final['max_bid'] / df_final['Actual_Profit'] # più è vicino a zero maggiore è la possibilità di profitto dato un certo investimento
 
 # How much time left to make an offer?
 hour_now = datetime.datetime.now().hour
 minute_now = datetime.datetime.now().minute
-df_final['end_hour_delta'] = (df_final['planned_close_at'].str[11:13].astype(int)+2) - datetime.datetime.now().hour
+df_final['end_hour_delta'] = (df_final['planned_close_at'].str[11:13].astype(int)) - datetime.datetime.now().hour
 df_final['end_minute_delta'] = abs((df_final['planned_close_at'].str[14:16].astype(int)) - datetime.datetime.now().minute)
 
 
@@ -175,23 +177,16 @@ df_final  = df_final[df_final['next_minimum_bid']<=threshold]
 # Now that we have the final DF we can select relevant items
 top_items = df_final[df_final['Ratio']>0].sort_values(by='Ratio').head(10).sort_values(by='favoriteCount', ascending=False)
 
-
-
-from pretty_html_table import build_table
-df = top_items[['title','next_minimum_bid','end_hour_delta','end_minute_delta','reservePriceSet','Actual_Profit','url']]
+# We create table to send via email
+df = top_items[['title','next_minimum_bid','end_hour_delta','end_minute_delta','reservePriceSet','close_to_reserve_price','Actual_Profit','url']]
 output = build_table(df, 'blue_light')
 
 ##### PROVA MAIL AUTOMATICHE
-
-import yagmail
-
 user = 'edoardodenigris2@gmail.com'
 app_password = gmail_app_pwd # a token for gmail
 to = ['edoardodenigris2@gmail.com']
-
-subject = 'test subject 1'
+subject = 'Migliori Oggetti Catawiki'
 content = ['Hey! These are the top 10 items in the category: '+str(category),output]
-
 with yagmail.SMTP(user, app_password) as yag:
     yag.send(to, subject, content)
     print('Sent email successfully')
