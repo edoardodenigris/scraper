@@ -134,6 +134,8 @@ def get_shipping_costs(list_of_ids):
 n_pages = 2
 category = 599
 
+#pietre preziose 599, orologi 333, diamanti 715
+
 
 # Getting Lots info
 lots = get_lots(n_pages, category)
@@ -178,7 +180,7 @@ df_final  = df_final[df_final['next_minimum_bid']<=threshold]
 top_items = df_final[df_final['Ratio']>0].sort_values(by='Ratio').head(10).sort_values(by='favoriteCount', ascending=False)
 
 # We create table to send via email
-df = top_items[['title','next_minimum_bid','end_hour_delta','end_minute_delta','reservePriceSet','close_to_reserve_price','Actual_Profit','url']]
+df = top_items[['title','subtitle','next_minimum_bid','end_hour_delta','end_minute_delta','reservePriceSet','close_to_reserve_price','Actual_Profit','url']]
 output = build_table(df, 'blue_light')
 
 ##### PROVA MAIL AUTOMATICHE
